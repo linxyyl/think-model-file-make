@@ -7,8 +7,8 @@ use think\console\Command;
 use think\console\Input;
 use think\console\input\Argument;
 use think\console\Output;
-use think\facade\Db;
 use think\facade\Console;
+use think\facade\Db;
 
 
 class ModelFileGenerate extends Command
@@ -17,16 +17,20 @@ class ModelFileGenerate extends Command
     {
         // 指令配置
         $this->setName('modelfilegenerate')
-            ->addArgument('catalog', Argument::OPTIONAL, '目录名', 'app\model')
+            ->addArgument('namec', Argument::OPTIONAL, '目录名', 'app\linxyyl\model')
             ->setDescription('the modelfilegenerate command');
     }
 
     protected function execute(Input $input, Output $output)
     {
         // 获取生成目录名
-        $catalog = $input->getArgument('catalog');
+        $namec = $input->getArgument('namec');
+        $catalog = 'app/linxyyl';
+        if (!is_dir('app/linxyyl')) {
+            mkdir($catalog);
+        }
+        $catalog = 'app/linxyyl/model';
         mkdir($catalog);
-
         // 指令输出
         $output->writeln('模型文件生成');
         $database_name = env('database.database');
@@ -39,16 +43,18 @@ class ModelFileGenerate extends Command
             $file_name = $catalog . '/' . $model_name . '.php';
             touch($file_name);
             $file_obj = fopen($file_name, 'r+');
-            fwrite($file_obj, $this->createCode($model_name,$catalog));
+            fwrite($file_obj, $this->createCode($model_name, $namec));
         }
-        Console::call("model:annotation");
+        //Console::call("model:annotation",["dir linxyyl/model"]);
+        exec('php think model:annotation --dir linxyyl/model');
     }
+
 
     /**
      * @param $model_name
      * @return string
      */
-    private function createCode($model_name,$namebase)
+    private function createCode($model_name, $namebase)
     {
         $str1 = '$model';
 
